@@ -1,22 +1,23 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-
+import FilmRouter from './routes/films'
+import CinemasRouter from './routes/cinemas'
+import CenterRouter from './routes/center'
+import City from '@/views/City/index'
+import store from '@/store/index'
 Vue.use(VueRouter)
 
 const routes = [
+  ...FilmRouter,
+  CinemasRouter,
+  ...CenterRouter,
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    redirect:'/films/nowPlaying'
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/city',
+    component:City
   }
 ]
 
@@ -24,6 +25,23 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  let str = ['/balence']
+  let jwt = store.state.global._token
+  if (jwt) {
+    next()
+  } else {
+    if (str.includes(to.path)) {
+      router.push({
+        path: '/login',
+        query:{callback:to.path}
+      })
+    } else {
+      next()
+    }
+  }
 })
 
 export default router
